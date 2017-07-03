@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="main.dao.DailyDao">
+
+    <resultMap id="dailyMap" type="main.entity.Daily">
+        <result property="dailyId" javaType="java.lang.String" column="daily_id"/>
+        <result property="userId" javaType="java.lang.String" column="user_id"/>
+        <result property="content" javaType="java.lang.String" column="content"/>
+        <result property="createTime" javaType="java.util.Date" column="create_time"/>
+        <result property="updateTime" javaType="java.util.Date" column="update_time"/>
+    </resultMap>
+
+    <insert id="insertDaily" parameterType="main.entity.Daily">
+        INSERT INTO
+        dailys(daily_id,user_id,content)
+        VALUES
+        (#{dailyId},#{userId},#{content})
+    </insert>
+
+    <select id="getDailyById" parameterType="java.lang.String" resultType="main.entity.Daily">
+        SELECT *
+        FROM
+        dailys
+        WHERE
+        daily_id=#{dailyId}
+    </select>
+
+    <select id="getDailysByUserId" resultMap="dailyMap">
+        SELECT *
+        FROM
+        dailys
+        WHERE
+        user_id=#{userId}
+        <if test="offset != null and limit != null">
+            ORDER BY create_time DESC
+            limit #{offset},#{limit}
+        </if>
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT count(*) FROM dailys WHERE user_id=#{userId}
+    </select>
+</mapper>

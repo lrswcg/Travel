@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="main.dao.TripNoteDao">
+
+    <resultMap id="tripNoteMap" type="main.entity.TripNote">
+        <id property="noteId" javaType="java.lang.String" column="note_id" />
+        <result property="title" javaType="java.lang.String" column="title"/>
+        <result property="cover" javaType="java.lang.String" column="cover"/>
+        <result property="location" javaType="java.lang.String" column="location"/>
+        <result property="content" javaType="java.lang.String" column="content"/>
+        <result property="createTime" javaType="java.util.Date" column="create_time"/>
+        <result property="updateTime" javaType="java.util.Date" column="update_time"/>
+        <association property="user" javaType="main.entity.User">
+            <id property="userId" javaType="java.lang.String" column="user_id"/>
+            <result property="nickname" javaType="java.lang.String" column="nickname"/>
+            <result property="gender" javaType="java.lang.String" column="gender"/>
+            <result property="avatar" javaType="java.lang.String" column="avatar"/>
+        </association>
+    </resultMap>
+
+    <insert id="insert" parameterType="main.entity.TripNote">
+        INSERT INTO
+        trip_notes(note_id,user_id,title,cover,location,content)
+        VALUES
+        (#{noteId},#{user.userId},#{title},#{cover},#{location},#{content})
+    </insert>
+
+    <update id="update" parameterType="main.entity.TripNote">
+        UPDATE
+        trip_notes
+        SET
+        title=#{title},cover=#{cover},location=#{location},content=#{content}
+        WHERE
+        note_id=#{noteId}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.String">
+        DELETE FROM
+        trip_notes
+        WHERE
+        note_id=#{id}
+    </delete>
+
+    <select id="getById" parameterType="java.lang.String" resultMap="tripNoteMap">
+        SELECT n.note_id,n.user_id,n.title,n.cover,n.location,n.content,n.create_time,n.update_time,
+         u.nickname,u.gender,u.avatar
+         FROM trip_notes n LEFT JOIN users u ON n.user_id=u.user_id WHERE note_id=#{id}
+    </select>
+
+
+    <select id="list" resultMap="tripNoteMap">
+        SELECT n.note_id,n.user_id,n.title,n.cover,n.location,n.content,n.create_time,n.update_time,
+        u.nickname,u.gender,u.avatar
+        FROM trip_notes n LEFT JOIN users u ON n.user_id=u.user_id
+        <where>
+            <if test='userId!=null and userId!=""'>
+                and n.user_id=#{userId}
+            </if>
+            <if test='location!=null and location!=""'>
+                and n.location=#{location}
+            </if>
+        </where>
+        ORDER BY n.create_time DESC
+        <if test="offset!=null and limit!=null">
+             limit #{offset},#{limit}
+         </if>
+    </select>
+
+    <select id="location" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT location FROM trip_notes WHERE user_id=#{userId} GROUP BY location;
+    </select>
+
+    <select id="count" resultType="int" parameterType="java.lang.String">
+        SELECT count(*) FROM trip_notes
+        <if test='userId!=null and userId!="" '>
+            WHERE user_id=#{userId}
+        </if>
+    </select>
+</mapper>

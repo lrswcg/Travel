@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="main.dao.CommentDao">
+    <resultMap id="commentMap" type="main.entity.Comment">
+        <id property="id" javaType="java.lang.String" column="id"/>
+        <result property="noteId" javaType="java.lang.String" column="note_id"/>
+        <result property="content" javaType="java.lang.String" column="content"/>
+        <result property="createTime" javaType="java.util.Date" column="create_time"/>
+        <result property="updateTime" javaType="java.util.Date" column="update_time"/>
+        <association property="user" javaType="main.entity.User">
+            <id property="userId" javaType="java.lang.String" column="user_id"/>
+            <result property="nickname" javaType="java.lang.String" column="nickname"/>
+            <result property="gender" javaType="java.lang.String" column="gender"/>
+            <result property="avatar" javaType="java.lang.String" column="avatar"/>
+        </association>
+    </resultMap>
+
+    <insert id="insert" parameterType="main.entity.Comment">
+        INSERT INTO
+        comments(id,note_id,user_id,content)
+        VALUES
+        (#{id},#{noteId},#{user.userId},#{content})
+    </insert>
+
+    <update id="update" parameterType="main.entity.Comment">
+        UPDATE
+        comments
+        SET
+        content=#{content}
+        WHERE
+        id=#{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.String">
+        DELETE FROM
+        comments
+        WHERE
+        id=#{id}
+    </delete>
+
+    <select id="getById" resultType="main.entity.Comment">
+        SELECT c.*,u.nickname,u.gender,u.avatar FROM comments c LEFT JOIN users u ON c.user_id=u.user_id WHERE id=#{id}
+    </select>
+
+    <select id="list" resultMap="commentMap">
+        SELECT c.*,u.nickname,u.gender,u.avatar FROM comments c LEFT JOIN users u ON c.user_id=u.user_id
+        <if test='noteId!=null and noteId!="" '>
+            WHERE note_id=#{noteId}
+        </if>
+        ORDER BY c.create_time DESC
+        <if test="offset!=null and limit!=null">
+            limit #{offset},#{limit}
+        </if>
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT count(*) FROM comments WHERE note_id=#{noteId}
+    </select>
+</mapper>

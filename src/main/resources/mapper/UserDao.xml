@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="main.dao.UserDao">
+
+    <select id="getUserById" resultType="main.entity.User" parameterType="java.lang.String">
+        SELECT * FROM users WHERE user_id=#{userId}
+    </select>
+
+    <select id="getUserByEmail" resultType="main.entity.User" parameterType="java.lang.String">
+        SELECT * FROM users WHERE email=#{email}
+    </select>
+
+    <select id="getUserByName" resultType="main.entity.User" parameterType="java.lang.String">
+        SELECT * FROM users WHERE nickname=#{nickname}
+    </select>
+
+    <resultMap id="userMap" type="main.entity.User">
+        <result property="userId" javaType="java.lang.String" column="user_id"/>
+        <result property="email" javaType="java.lang.String" column="email"/>
+        <result property="nickname" javaType="java.lang.String" column="nickname"/>
+        <result property="password" javaType="java.lang.String" column="password"/>
+        <result property="gender" javaType="java.lang.String" column="gender"/>
+        <result property="avatar" javaType="java.lang.String" column="avatar"/>
+        <result property="sign" javaType="java.lang.String" column="sign"/>
+        <result property="createTime" javaType="java.util.Date" column="create_time"/>
+        <result property="updateTime" javaType="java.util.Date" column="update_time"/>
+    </resultMap>
+
+    <select id="getUsers" resultMap="userMap">
+        SELECT * FROM users ORDER BY create_time DESC
+        <if test="offset!=null and limit!=null">
+            LIMIT #{offset},#{limit}
+        </if>
+    </select>
+
+    <insert id="insertUser" parameterType="main.entity.User">
+        INSERT INTO
+		users(user_id,email,nickname,password,gender,avatar,sign)
+		VALUES
+		(#{userId},#{email},#{nickname},#{password},#{gender},#{avatar},#{sign})
+    </insert>
+
+    <delete id="deleteUser" parameterType="java.lang.String">
+        DELETE FROM
+        users
+        WHERE
+        user_id=#{userId}
+    </delete>
+
+    <update id="updateUser" parameterType="java.lang.String">
+        UPDATE
+        users
+        <trim prefix="SET" prefixOverrides=",">
+            <if test='nickname!=null and nickname!=""'>
+              ,nickname=#{nickname}
+            </if>
+            <if test='avatar!=null and avatar!=""'>
+                ,avatar=#{avatar}
+            </if>
+            <if test='sign!=null and sign!=""'>
+                ,sign=#{sign}
+            </if>
+        </trim>
+        WHERE
+        user_id=#{userId}
+    </update>
+
+    <select id="countUser" resultType="int">
+        SELECT count(*)
+        FROM users
+    </select>
+</mapper>
